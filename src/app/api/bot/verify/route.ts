@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Falta el parámetro phone' }, { status: 400 })
   }
 
-  // En producción: consultar Supabase
+  // EN PRODUCCION: Seleccionar contadores de mensajes
   // const { data: user } = await supabaseAdmin()
   //   .from('users')
-  //   .select('id, name, status, plan, trial_ends_at')
+  //   .select('id, name, status, plan, trial_ends_at, monthly_message_count, monthly_limit')
   //   .eq('whatsapp_number', phone)
   //   .single()
 
@@ -23,20 +23,33 @@ export async function GET(request: NextRequest) {
     name: 'María González',
     status: 'active',
     plan: 'bundle',
-    agents: ['finance', 'gym', 'nutrition'],
+    agents: ['finance', 'gym', 'nutrition', 'productivity'],
+    monthly_message_count: 950,
+    monthly_limit: 1000,
   }
 
   // Lógica de acceso:
-  // - active → acceso completo según plan
+  // - active → acceso completo según plan (filtrado por cuota)
   // - trial → acceso completo hasta trial_ends_at
   // - past_due → sin acceso, mandar link de pago
   // - cancelled → sin acceso, ofrecer comeback
 
-  if (mockUser.status === 'active' || mockUser.status === 'trial') {
+  // Evaluación de Fair Use (Límites de mensajes)
+  const isOverQuota = mockUser.monthly_message_count >= mockUser.monthly_limit;
+
+  if ((mockUser.status === 'active' || mockUser.status === 'trial') && !isOverQuota) {
     return NextResponse.json({
       access: true,
       user: mockUser,
       message: null,
+    })
+  }
+
+  if ((mockUser.status === 'active' || mockUser.status === 'trial') && isOverQuota) {
+    return NextResponse.json({
+      access: false,
+      user: mockUser,
+      message: `Hola ${mockUser.name}, alcanzaste el límite de ${mockUser.monthly_limit} mensajes permitidos este mes para asegurar la velocidad del sistema. Podés esperar al próximo mes o ampliar tu plan acá: https://lifeos.app/upgrade`,
     })
   }
 

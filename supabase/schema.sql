@@ -20,6 +20,9 @@ CREATE TABLE users (
     CHECK (status IN ('trial', 'active', 'past_due', 'cancelled')),
   plan VARCHAR(20) NOT NULL DEFAULT 'single'
     CHECK (plan IN ('single', 'bundle', 'affiliate')),
+  monthly_message_count INT DEFAULT 0,
+  tokens_used_this_month INT DEFAULT 0,
+  monthly_limit INT DEFAULT 1000,
   stripe_customer_id VARCHAR(255),
   affiliate_id UUID REFERENCES affiliates(id),
   trial_ends_at TIMESTAMPTZ,
@@ -156,6 +159,41 @@ CREATE TABLE meal_plans (
 );
 
 CREATE INDEX idx_meal_user ON meal_plans(user_id);
+
+-- =====================================================
+-- TABLA: message_queue (Protección Asíncrona Webhook)
+-- =====================================================
+CREATE TABLE message_queue (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  whatsapp_message_id VARCHAR(255) UNIQUE NOT NULL,
+  sender_number VARCHAR(20) NOT NULL,
+  raw_payload JSONB NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending'
+    CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  error_log TEXT,
+  received_at TIMESTAMPTZ DEFAULT NOW(),
+  processed_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_mq_status ON message_queue(status);
+CREATE INDEX idx_mq_received ON message_queue(received_at);
+
+-- =====================================================
+-- TABLA: agent_memories (Memoria a Largo Plazo)
+-- =====================================================
+CREATE TABLE agent_memories (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  agent_type VARCHAR(20) NOT NULL
+    CHECK (agent_type IN ('finance', 'gym', 'nutrition', 'productivity', 'global')),
+  memory_data JSONB NOT NULL DEFAULT '{}'::jsonb,
+  last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, agent_type)
+);
+
+CREATE INDEX idx_memories_user ON agent_memories(user_id);
 
 -- =====================================================
 -- FUNCIÓN: Auto-update updated_at
