@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LifeOS - AI Ecosystem & CRM
 
-## Getting Started
+LifeOS es una plataforma SaaS diseñada para gestionar un ecosistema de agentes de IA interconectados vía WhatsApp. Integra un CRM completo para administrar clientes, afiliados y campañas, además de controlar suscripciones con webhooks automatizados.
 
-First, run the development server:
+## 🚀 Características Principales
 
+1. **Dashboard de Administración**: Métricas en tiempo real, MRR, usuarios activos, y gestión integral de clientes.
+2. **Sistema de Afiliados**: Portal dedicado con links únicos de referido, cálculo de comisiones (CPA/RevShare), y proyecciones de ganancias.
+3. **Agentes de IA (WhatsApp)**: Infraestructura preparada para enrutar mensajes a 4 agentes especializados (Finanzas, Gym, Nutrición, Productividad) conectando con n8n y Meta Cloud API.
+4. **Campañas de Retargeting**: Plantillas para envíos de campañas manuales o automatizadas por WhatsApp.
+5. **Pagos y Webhooks**: Integración lista para gestionar cobros, pruebas gratuitas (trials) y facturación recurrentes, con endpoints de control para el bot.
+
+## 🛠️ Stack Tecnológico
+
+- **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS.
+- **Backend**: Next.js API Routes.
+- **Base de Datos**: Supabase (PostgreSQL) - *[Ver esquema en `supabase/schema.sql`]*
+- **Webhooks y Pagos**: Hooks listos para procesar los eventos.
+- **Orquestación de IA**: n8n (para el flujo conversacional inteligente en WhatsApp).
+
+## 📁 Estructura del Proyecto
+
+- `/src/app`: Rutas del frontend (Landing page generadora de leads, `/admin`, `/affiliate`).
+- `/src/app/api`: Endpoints del backend (webhooks de WhatsApp, cobros, validación de acceso `bot/verify`).
+- `/src/lib`: Utilidades y configuraciones de servicios externos (clientes de Supabase y pasarelas).
+- `/supabase/schema.sql`: Estructura pre-diseñada de la base de datos lista para desplegar.
+- `/AGENTS.md` y `/n8n_prompts_guide.md`: Guías y prompts para la creación de los flujos.
+
+## ⚙️ Configuración y Despliegue Local
+
+### 1. Descargar e Instalar
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/onepercentgsgr/-LifeOS-.git
+cd -LifeOS-
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Variables de Entorno
+Copia el archivo `.env.example` y renómbralo a `.env.local` (o créalo si no existe).
+Asegúrate de llenar las credenciales con tus llaves reales de Supabase y la API de Pagos:
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu_url_aqui
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_key_aqui
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configurar Base de Datos (Supabase)
+Dentro del dashboard de tu proyecto en Supabase, ve al apartado "SQL Editor", crea una nueva consulta y pega todo el contenido del archivo `supabase/schema.sql`. Al ejecutarlo, se crearán de inmediato las 8 tablas estructurales del proyecto.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Lanzar el Servidor en Modo Desarrollo
+```bash
+npm run dev
+```
+Abre tu navegador en [http://localhost:3000](http://localhost:3000) y verás la plataforma corriendo.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Este proyecto está preparado para hacer deploy de manera instantánea conectando el repositorio directamente a Vercel.*
